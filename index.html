@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iqlim O'zgarishi - Prezentatsiya | Climate Justice</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Leaflet CSS va JS (Xarita uchun) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+            overflow-x: hidden;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        /* Custom Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(2deg); }
+        }
+        
+        @keyframes glow {
+            0%, 100% { filter: drop-shadow(0 0 5px rgba(255,255,255,0.3)); }
+            50% { filter: drop-shadow(0 0 20px rgba(255,255,255,0.6)); }
+        }
+        
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        @keyframes slideInLeft {
+            from {
+                transform: translateX(-100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes scaleIn {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes rotateIn {
+            from {
+                transform: rotate(-180deg) scale(0);
+                opacity: 0;
+            }
+            to {
+                transform: rotate(0) scale(1);
+                opacity: 1;
+            }
+        }
+        
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .glow-animation {
+            animation: glow 3s ease-in-out infinite;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+        }
+        
+        .slide-left {
+            animation: slideInLeft 1s ease-out forwards;
+        }
+        
+        .slide-right {
+            animation: slideInRight 1s ease-out forwards;
+        }
+        
+        .scale-in {
+            animation: scaleIn 0.8s ease-out forwards;
+        }
+        
+        .rotate-in {
+            animation: rotateIn 1s ease-out forwards;
+        }
+        
+        /* Team Card Styles */
+        .team-card {
+            position: relative;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .team-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.7s ease;
+        }
+        
+        .team-card:hover {
+            transform: translateY(-15px) scale(1.02);
+            box-shadow: 0 30px 40px rgba(0,0,0,0.3);
+            border-color: rgba(255,255,255,0.5);
+        }
+        
+        .team-card:hover::before {
+            left: 100%;
+        }
+        
+        .team-card:hover .team-icon {
+            transform: rotateY(360deg);
+        }
+        
+        .team-icon {
+            transition: transform 0.8s ease;
+        }
+        
+        .team-social {
+            position: absolute;
+            bottom: -50px;
+            left: 0;
+            right: 0;
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(5px);
+            padding: 15px;
+            transition: bottom 0.3s ease;
+        }
+        
+        .team-card:hover .team-social {
+            bottom: 0;
+        }
+        
+        /* Presentation Timeline */
+        .timeline-item {
+            position: relative;
+            padding-left: 40px;
+            margin-bottom: 30px;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            box-shadow: 0 0 0 4px rgba(255,255,255,0.2);
+        }
+        
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            left: 9px;
+            top: 20px;
+            bottom: -20px;
+            width: 2px;
+            background: linear-gradient(to bottom, #667eea, transparent);
+        }
+        
+        .timeline-item:last-child::after {
+            display: none;
+        }
+        
+        /* Section Styles */
+        .section-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff, #a8c0ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            margin-bottom: 3rem;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 2px;
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+        
+        .progress-step {
+            position: relative;
+            padding: 20px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .progress-step:hover {
+            background: rgba(255,255,255,0.15);
+            transform: translateX(10px);
+        }
+        
+        .progress-step.active {
+            background: linear-gradient(135deg, rgba(102,126,234,0.3), rgba(118,75,162,0.3));
+            border-left: 4px solid #fff;
+        }
+        
+        /* Chart Container */
+        .chart-wrapper {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .chart-wrapper:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        
+        /* Map Styles */
+        #presentationMap {
+            height: 500px;
+            width: 100%;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        
+        .map-legend {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            padding: 10px 20px;
+            color: white;
+        }
+        
+        /* Counter Styles */
+        .counter-box {
+            text-align: center;
+            padding: 30px;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .counter-box:hover {
+            transform: scale(1.05);
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .counter-number {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #fff;
+            text-shadow: 0 0 20px rgba(255,255,255,0.5);
+        }
+        
+        /* Navigation */
+        .nav-item {
+            position: relative;
+            color: rgba(255,255,255,0.8);
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-item:hover {
+            color: white;
+        }
+        
+        .nav-item:hover::after {
+            width: 100%;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .section-title {
+                font-size: 2.5rem;
+            }
+            
+            .counter-number {
+                font-size: 2rem;
+            }
+        }
+        
+        /* Loading Animation */
+        .loader {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 5px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #764ba2, #667eea);
+        }
+    </style>
+</head>
+<body class="min-h-screen text-white">
+
+    <!-- Loading Screen -->
+    <div id="loading" class="fixed inset-0 bg-gradient-to-br from-purple-900 to-indigo-900 z-[9999] flex items-center justify-center">
+        <div class="text-center">
+            <div class="loader mx-auto mb-4"></div>
+            <h2 class="text-2xl font-bold animate-pulse">Prezentatsiya yuklanmoqda...</h2>
+            <p class="text-gray-300 mt-2">Iqlim adolati uchun birgalikda</p>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-black/20 backdrop-blur-md border-b border-white/10">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-600 rounded-lg flex items-center justify-center rotate-in">
+                        <i class="fas fa-globe-asia text-white"></i>
+                    </div>
+                    <span class="text-xl font-bold bg-gradient-to-r from-blue-300 to-purple-300 bg-clip-text text-transparent">
+                        Climate Justice
+                    </span>
+                </div>
+                
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#home" class="nav-item">Bosh sahifa</a>
+                    <a href="#team" class="nav-item">Jamoa</a>
+                    <a href="#presentation" class="nav-item">Prezentatsiya</a>
+                    <a href="#map" class="nav-item">Xarita</a>
+                    <a href="#data" class="nav-item">Ma'lumotlar</a>
+                </div>
+                
+                <button class="md:hidden text-white text-2xl">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="min-h-screen flex items-center justify-center relative overflow-hidden pt-20">
+        <!-- Animated Background -->
+        <div class="absolute inset-0 gradient-bg opacity-30"></div>
+        
+        <!-- Floating Elements -->
+        <div class="absolute top-20 left-10 w-72 h-72 bg-white/5 rounded-full blur-3xl float-animation"></div>
+        <div class="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl float-animation" style="animation-delay: 1s"></div>
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl float-animation" style="animation-delay: 2s"></div>
+        
+        <!-- Content -->
+        <div class="container mx-auto px-6 relative z-10 text-center">
+            <div class="mb-8 rotate-in">
+                <div class="w-28 h-28 mx-auto bg-gradient-to-br from-blue-400 to-purple-600 rounded-full flex items-center justify-center glow-animation">
+                    <i class="fas fa-balance-scale text-white text-4xl"></i>
+                </div>
+            </div>
+            
+            <h1 class="text-6xl md:text-8xl font-bold mb-6 slide-left">
+                <span class="bg-gradient-to-r from-blue-300 via-white to-purple-300 bg-clip-text text-transparent">
+                    Iqlim O'zgarishi
+                </span>
+                <br>
+                <span class="text-5xl md:text-7xl bg-gradient-to-r from-yellow-300 to-orange-400 bg-clip-text text-transparent">
+                    KIMGA Qimmat?
+                </span>
+            </h1>
+            
+            <p class="text-xl md:text-2xl text-gray-200 max-w-4xl mx-auto mb-12 slide-right">
+                Global isishning og'ir oqibatlarini eng kam hissa qo'shgan, 
+                lekin eng ko'p zarar ko'rayotgan davlatlar haqida interaktiv tadqiqot
+            </p>
+            
+            <div class="flex flex-wrap justify-center gap-6 scale-in">
+                <a href="#team" class="px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full text-white font-semibold text-lg hover:from-blue-600 hover:to-purple-700 transition transform hover:-translate-y-1 shadow-xl flex items-center">
+                    <i class="fas fa-users mr-3"></i>
+                    Jamoa bilan tanishing
+                </a>
+                <a href="#presentation" class="px-8 py-4 bg-white/10 backdrop-blur-md rounded-full text-white font-semibold text-lg hover:bg-white/20 transition transform hover:-translate-y-1 border border-white/30 flex items-center">
+                    <i class="fas fa-play-circle mr-3"></i>
+                    Prezentatsiyani boshlash
+                </a>
+            </div>
+            
+            <!-- Scroll Indicator -->
+            <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2">
+                <div class="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center">
+                    <div class="w-1 h-3 bg-white rounded-full mt-2 animate-bounce"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Team Section -->
+    <section id="team" class="py-24 relative">
+        <div class="absolute inset-0 bg-gradient-to-b from-transparent to-black/20"></div>
+        
+        <div class="container mx-auto px-6 relative z-10">
+            <h2 class="section-title text-center w-full">Loyiha Jamoasi</h2>
+            
+            <p class="text-center text-xl text-gray-200 max-w-3xl mx-auto mb-16">
+                5 kishilik professional jamoa iqlim adolati muammosini o'rganish va yechimlar taklif qilish uchun birlashdi
+            </p>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+                <!-- Xayrullayev Javohir -->
+                <div class="team-card p-6 text-center group">
+                    <div class="relative mb-4">
+                        <div class="w-32 h-32 mx-auto bg-gradient-to-br from-blue-400 to-indigo-600 rounded-full flex items-center justify-center team-icon">
+                            <i class="fas fa-user-tie text-white text-4xl"></i>
+                        </div>
+                        <div class="absolute -top-2 -right-2 w-10 h-10 bg-green-500 rounded-full flex items-center justify-center border-4 border-white/20">
+                            <i class="fas fa-star text-white text-sm"></i>
+                        </div>
+                    </div>
+                    
+                    <h3 class="text-xl font-bold mb-1">Xayrullayev Javohir</h3>
+                    <p class="text-blue-300 mb-3">Loyiha Rahbari</p>
+                    
+                    <div class="text-sm text-gray-300 mb-4">
+                        <div class="flex items-center justify-center mb-2">
+                            <i class="fas fa-clock text-blue-400 mr-2"></i>
+                            <span>8 daqiqa</span>
+                        </div>
+                        <p>Kirish, maqsad va vazifalar, umumiy tahlil</p>
+                    </div>
+                    
+                    <div class="team-social flex justify-center space-x-4">
+                        <a href="#" class="text-white hover:text-blue-400 transition"><i class="fab fa-telegram"></i></a>
+                        <a href="#" class="text-white hover:text-blue-400 transition"><i class="fab fa-linkedin"></i></a>
+                        <a href="#" class="text-white hover:text-blue-400 transition"><i class="fas fa-envelope"></i></a>
+                    </div>
+                </div>
+                
+                <!-- Mustafoqulov Xumoyun -->
+                <div class="team-card p-6 text-center group">
+                    <div class="relative mb-4">
+                        <div class="w-32 h-32 mx-auto bg-gradient-to-br from-purple-400 to-pink-600 rounded-full flex items-center justify-center team-icon">
+                            <i class="fas fa-chart-line text-white text-4xl"></i>
+                        </div>
+                    </div>
+                    
+                    <h3 class="text-xl font-bold mb-1">Mustafoqulov Xumoyun</h3>
+                    <p class="text-purple-300 mb-3">Data Analyst</p>
+                    
+                    <div class="text-sm text-gray-300 mb-4">
+                        <div class="flex items-center justify-center mb-2">
+                            <i class="fas fa-clock text-purple-400 mr-2"></i>
+                            <span>7 daqiqa</span>
+                        </div>
+                        <p>Statistik ma'lumotlar, diagrammalar, prognozlar</p>
+                    </div>
+                    
+                    <div class="team-social flex justify-center space-x-4">
+                        <a href="#" class="text-white hover:text-purple-400 transition"><i class="fab fa-telegram"></i></a>
+                        <a href="#" class="text-white hover:text-purple-400 transition"><i class="fab fa-github"></i></a>
+                        <a href="#" class="text-white hover:text-purple-400 transition"><i class="fas fa-chart-pie"></i></a>
+                    </div>
+                </div>
+                
+                <!-- Nuriddinov Nurmuhammad -->
+                <div class="team-card p-6 text-center group">
+                    <div class="relative mb-4">
+                        <div class="w-32 h-32 mx-auto bg-gradient-to-br from-green-400 to-teal-600 rounded-full flex items-center justify-center team-icon">
+                            <i class="fas fa-code text-white text-4xl"></i>
+                        </div>
+                    </div>
+                    
+                    <h3 class="text-xl font-bold mb-1">Nuriddinov Nurmuhammad</h3>
+                    <p class="text-green-300 mb-3">Frontend Developer</p>
+                    
+                    <div class="text-sm text-gray-300 mb-4">
+                        <div class="flex items-center justify-center mb-2">
+                            <i class="fas fa-clock text-green-400 mr-2"></i>
+                            <span>6 daqiqa</span>
+                        </div>
+                        <p>Interaktiv demo, veb-sayt, animatsiyalar</p>
+                    </div>
+                    
+                    <div class="team-social flex justify-center space-x-4">
+                        <a href="#" class="text-white hover:text-green-400 transition"><i class="fab fa-telegram"></i></a>
+                        <a href="#" class="text-white hover:text-green-400 transition"><i class="fab fa-github"></i></a>
+                        <a href="#" class="text-white hover:text-green-400 transition"><i class="fas fa-globe"></i></a>
+                    </div>
+                </div>
+                
+                <!-- Gayratov Sherzod -->
+                <div class="team-card p-6 text-center group">
+                    <div class="relative mb-4">
+                        <div class="w-32 h-32 mx-auto bg-gradient-to-br from-yellow-400 to-orange-600 rounded-full flex items-center justify-center team-icon">
+                            <i class="fas fa-map-marked-alt text-white text-4xl"></i>
+                        </div>
+                    </div>
+                    
+                    <h3 class="text-xl font-bold mb-1">Gayratov Sherzod</h3>
+                    <p class="text-yellow-300 mb-3">GIS Mutaxassisi</p>
+                    
+                    <div class="text-sm text-gray-300 mb-4">
+                        <div class="flex items-center justify-center mb-2">
+                            <i class="fas fa-clock text-yellow-400 mr-2"></i>
+                            <span>5 daqiqa</span>
+                        </div>
+                        <p>Interaktiv xarita, geoma'lumotlar, hududiy tahlil</p>
+                    </div>
+                    
+                    <div class="team-social flex justify-center space-x-4">
+                        <a href="#" class="text-white hover:text-yellow-400 transition"><i class="fab fa-telegram"></i></a>
+                        <a href="#" class="text-white hover:text-yellow-400 transition"><i class="fas fa-map"></i></a>
+                        <a href="#" class="text-white hover:text-yellow-400 transition"><i class="fas fa-satellite"></i></a>
+                    </div>
+                </div>
+                
+                <!-- Yormuhammedov Abror -->
+                <div class="team-card p-6 text-center group">
+                    <div class="relative mb-4">
+                        <div class="w-32 h-32 mx-auto bg-gradient-to-br from-red-400 to-pink-600 rounded-full flex items-center justify-center team-icon">
+                            <i class="fas fa-paint-brush text-white text-4xl"></i>
+                        </div>
+                    </div>
+                    
+                    <h3 class="text-xl font-bold mb-1">Yormuhammedov Abror</h3>
+                    <p class="text-red-300 mb-3">UI/UX Dizayner</p>
+                    
+                    <div class="text-sm text-gray-300 mb-4">
+                        <div class="flex items-center justify-center mb-2">
+                            <i class="fas fa-clock text-red-400 mr-2"></i>
+                            <span>4 daqiqa</span>
+                        </div>
+                        <p>Dizayn konsepsiyasi, vizual elementlar</p>
+                    </div>
+                    
+                    <div class="team-social flex justify-center space-x-4">
+                        <a href="#" class="text-white hover:text-red-400 transition"><i class="fab fa-telegram"></i></a>
+                        <a href="#" class="text-white hover:text-red-400 transition"><i class="fab fa-behance"></i></a>
+                        <a href="#" class="text-white hover:text-red-400 transition"><i class="fas fa-palette"></i></a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Team Stats -->
+            <div class="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div class="counter-box">
+                    <div class="counter-number counter" data-target="5">5</div>
+                    <div class="text-gray-300">Jamoa a'zolari</div>
+                </div>
+                <div class="counter-box">
+                    <div class="counter-number counter" data-target="30">30</div>
+                    <div class="text-gray-300">Daqiqa prezentatsiya</div>
+                </div>
+                <div class="counter-box">
+                    <div class="counter-number counter" data-target="15">15</div>
+                    <div class="text-gray-300">Ma'lumot manbalari</div>
+                </div>
+                <div class="counter-box">
+                    <div class="counter-number counter" data-target="10">10</div>
+                    <div class="text-gray-300">Interaktiv elementlar</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Presentation Timeline Section -->
+    <section id="presentation" class="py-24 relative">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+        
+        <div class="container mx-auto px-6 relative z-10">
+            <h2 class="section-title text-center w-full">Prezentatsiya Rejasi</h2>
+            
+            <div class="grid lg:grid-cols-2 gap-12">
+                <!-- Timeline -->
+                <div class="glass-card p-8">
+                    <h3 class="text-2xl font-bold mb-8 flex items-center">
+                        <i class="fas fa-clock text-blue-400 mr-3"></i>
+                        Vaqt taqsimoti (30 daqiqa)
+                    </h3>
+                    
+                    <div class="timeline-item">
+                        <h4 class="text-xl font-bold">Kirish qismi</h4>
+                        <p class="text-gray-300">Xayrullayev Javohir - 8 daqiqa</p>
+                        <p class="text-sm text-gray-400 mt-1">Muammoning dolzarbligi, maqsad va vazifalar</p>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <h4 class="text-xl font-bold">Statistik tahlil</h4>
+                        <p class="text-gray-300">Mustafoqulov Xumoyun - 7 daqiqa</p>
+                        <p class="text-sm text-gray-400 mt-1">Emissiya ma'lumotlari, zaiflik indekslari</p>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <h4 class="text-xl font-bold">Texnologik demo</h4>
+                        <p class="text-gray-300">Nuriddinov Nurmuhammad - 6 daqiqa</p>
+                        <p class="text-sm text-gray-400 mt-1">Interaktiv veb-sayt, animatsiyalar</p>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <h4 class="text-xl font-bold">Geografik tahlil</h4>
+                        <p class="text-gray-300">Gayratov Sherzod - 5 daqiqa</p>
+                        <p class="text-sm text-gray-400 mt-1">Xarita ma'lumotlari, hududiy tahlil</p>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <h4 class="text-xl font-bold">Dizayn konsepsiyasi</h4>
+                        <p class="text-gray-300">Yormuhammedov Abror - 4 daqiqa</p>
+                        <p class="text-sm text-gray-400 mt-1">Vizual elementlar, ranglar, tipografiya</p>
+                    </div>
+                </div>
+                
+                <!-- Progress Steps -->
+                <div class="glass-card p-8">
+                    <h3 class="text-2xl font-bold mb-8 flex items-center">
+                        <i class="fas fa-tasks text-purple-400 mr-3"></i>
+                        Prezentatsiya bosqichlari
+                    </h3>
+                    
+                    <div class="space-y-4">
+                        <div class="progress-step active">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold">1-bosqich: Kirish</span>
+                                <span class="text-sm text-blue-400">08:00</span>
+                            </div>
+                            <div class="w-full bg-white/10 h-2 rounded-full mt-2">
+                                <div class="w-1/4 bg-blue-400 h-2 rounded-full"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="progress-step">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold">2-bosqich: Statistik ma'lumotlar</span>
+                                <span class="text-sm text-purple-400">07:00</span>
+                            </div>
+                            <div class="w-full bg-white/10 h-2 rounded-full mt-2">
+                                <div class="w-1/5 bg-purple-400 h-2 rounded-full"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="progress-step">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold">3-bosqich: Interaktiv demo</span>
+                                <span class="text-sm text-green-400">06:00</span>
+                            </div>
+                            <div class="w-full bg-white/10 h-2 rounded-full mt-2">
+                                <div class="w-1/6 bg-green-400 h-2 rounded-full"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="progress-step">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold">4-bosqich: Xarita tahlili</span>
+                                <span class="text-sm text-yellow-400">05:00</span>
+                            </div>
+                            <div class="w-full bg-white/10 h-2 rounded-full mt-2">
+                                <div class="w-1/7 bg-yellow-400 h-2 rounded-full"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="progress-step">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold">5-bosqich: Dizayn</span>
+                                <span class="text-sm text-red-400">04:00</span>
+                            </div>
+                            <div class="w-full bg-white/10 h-2 rounded-full mt-2">
+                                <div class="w-1/8 bg-red-400 h-2 rounded-full"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8 p-6 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-xl">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-300">Jami vaqt:</p>
+                                <p class="text-3xl font-bold">30 daqiqa</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-300">Savol-javob:</p>
+                                <p class="text-2xl font-bold">+10 daqiqa</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Interactive Map Section -->
+    <section id="map" class="py-24 relative">
+        <div class="container mx-auto px-6 relative z-10">
+            <h2 class="section-title text-center w-full">Iqlim Xavfi Xaritasi</h2>
+            
+            <p class="text-center text-xl text-gray-200 max-w-3xl mx-auto mb-12">
+                Eng ko'p zarar ko'rayotgan davlatlar va ularning xavf darajalari
+            </p>
+            
+            <!-- Map Container -->
+            <div id="presentationMap" class="mb-6"></div>
+            
+            <!-- Map Legend -->
+            <div class="map-legend inline-flex flex-wrap gap-4">
+                <div class="flex items-center">
+                    <div class="w-4 h-4 bg-red-500 rounded-full mr-2"></div>
+                    <span>Juda yuqori xavf (9-10)</span>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-4 h-4 bg-orange-500 rounded-full mr-2"></div>
+                    <span>Yuqori xavf (7-8)</span>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-4 h-4 bg-yellow-500 rounded-full mr-2"></div>
+                    <span>O'rtacha xavf (5-6)</span>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-4 h-4 bg-blue-500 rounded-full mr-2"></div>
+                    <span>Dengiz sathi xavfi</span>
+                </div>
+            </div>
+            
+            <!-- Map Controls -->
+            <div class="flex flex-wrap gap-4 mt-6">
+                <button onclick="showVulnerableCountries()" class="px-6 py-3 bg-gradient-to-r from-red-500 to-pink-500 rounded-full hover:from-red-600 hover:to-pink-600 transition flex items-center">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    Zaif davlatlar
+                </button>
+                <button onclick="showSeaLevelRise()" class="px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full hover:from-blue-600 hover:to-cyan-600 transition flex items-center">
+                    <i class="fas fa-water mr-2"></i>
+                    Dengiz sathi
+                </button>
+                <button onclick="resetMap()" class="px-6 py-3 bg-white/10 backdrop-blur-md rounded-full hover:bg-white/20 transition flex items-center">
+                    <i class="fas fa-sync-alt mr-2"></i>
+                    Tiklash
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Data & Charts Section -->
+    <section id="data" class="py-24 relative">
+        <div class="container mx-auto px-6 relative z-10">
+            <h2 class="section-title text-center w-full">Statistik Ma'lumotlar</h2>
+            
+            <div class="grid lg:grid-cols-2 gap-8">
+                <!-- Chart 1 -->
+                <div class="chart-wrapper">
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fas fa-chart-pie text-blue-400 mr-3"></i>
+                        Tarixiy emissiya taqsimoti
+                    </h3>
+                    <canvas id="emissionsChart" style="height: 300px;"></canvas>
+                </div>
+                
+                <!-- Chart 2 -->
+                <div class="chart-wrapper">
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fas fa-chart-bar text-purple-400 mr-3"></i>
+                        Iqlim zaiflik indeksi
+                    </h3>
+                    <canvas id="vulnerabilityChart" style="height: 300px;"></canvas>
+                </div>
+                
+                <!-- Chart 3 -->
+                <div class="chart-wrapper">
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fas fa-chart-line text-green-400 mr-3"></i>
+                        Iqtisodiy zarar prognozi
+                    </h3>
+                    <canvas id="economicChart" style="height: 300px;"></canvas>
+                </div>
+                
+                <!-- Chart 4 -->
+                <div class="chart-wrapper">
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fas fa-balance-scale text-yellow-400 mr-3"></i>
+                        Adolatsizlik darajasi
+                    </h3>
+                    <canvas id="injusticeChart" style="height: 300px;"></canvas>
+                </div>
+            </div>
+            
+            <!-- Key Findings -->
+            <div class="mt-12 glass-card p-8">
+                <h3 class="text-2xl font-bold mb-6">Asosiy xulosalar</h3>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-exclamation-triangle text-red-400 text-xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold">Eng zaif davlat</h4>
+                            <p class="text-gray-300">Maldiv orollari - 9.8/10 xavf darajasi</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start space-x-4">
+                        <div class="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-water text-blue-400 text-xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold">Dengiz sathi</h4>
+                            <p class="text-gray-300">2100-yilgacha +2.7°C harorat o'sishi</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start space-x-4">
+                        <div class="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-users text-green-400 text-xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold">Xavf ostidagi aholi</h4>
+                            <p class="text-gray-300">216 million kishi</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-black/30 backdrop-blur-md py-12 border-t border-white/10">
+        <div class="container mx-auto px-6">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-600 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-globe-asia text-white"></i>
+                        </div>
+                        <span class="text-xl font-bold">Climate Justice</span>
+                    </div>
+                    <p class="text-gray-400 text-sm">
+                        Iqlim adolati va global isish muammolarini o'rganish uchun interaktiv platforma
+                    </p>
+                </div>
+                
+                <div>
+                    <h4 class="font-bold mb-4">Jamoa</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li>Xayrullayev Javohir</li>
+                        <li>Mustafoqulov Xumoyun</li>
+                        <li>Nuriddinov Nurmuhammad</li>
+                        <li>Gayratov Sherzod</li>
+                        <li>Yormuhammedov Abror</li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-bold mb-4">Bo'limlar</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#home" class="hover:text-white transition">Bosh sahifa</a></li>
+                        <li><a href="#team" class="hover:text-white transition">Jamoa</a></li>
+                        <li><a href="#presentation" class="hover:text-white transition">Prezentatsiya</a></li>
+                        <li><a href="#map" class="hover:text-white transition">Xarita</a></li>
+                        <li><a href="#data" class="hover:text-white transition">Ma'lumotlar</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-bold mb-4">Topshirish</h4>
+                    <div class="bg-white/10 rounded-lg p-4">
+                        <p class="text-2xl font-bold text-blue-400">31-yanvar</p>
+                        <p class="text-gray-400 text-sm">2025-yil</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-white/10 mt-8 pt-8 text-center text-gray-400 text-sm">
+                <p>© 2025 Iqlim O'zgarishi - Kimga Qimmat? Loyihasi. Barcha huquqlar himoyalangan.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Hide loading screen
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                document.getElementById('loading').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('loading').style.display = 'none';
+                }, 500);
+            }, 1000);
+        });
+
+        // Map initialization
+        let map;
+        let vulnerableLayer;
+        let seaLevelLayer;
+
+        function initMap() {
+            map = L.map('presentationMap').setView([20, 0], 2);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+            
+            // Vulnerable countries layer
+            vulnerableLayer = L.layerGroup().addTo(map);
+            seaLevelLayer = L.layerGroup().addTo(map);
+            
+            const countries = [
+                { name: 'Bangladesh', lat: 23.6850, lng: 90.3563, risk: 9.8, color: '#ff4444' },
+                { name: 'Maldives', lat: 3.2028, lng: 73.2207, risk: 9.5, color: '#ff4444' },
+                { name: 'Somali', lat: 5.1521, lng: 46.1996, risk: 9.2, color: '#ff4444' },
+                { name: 'Kiribati', lat: 1.4518, lng: -157.3844, risk: 9.5, color: '#ff4444' },
+                { name: 'Haiti', lat: 18.9712, lng: -72.2852, risk: 8.5, color: '#ff8844' },
+                { name: 'Fiji', lat: -17.7134, lng: 178.0650, risk: 8.8, color: '#ff8844' },
+                { name: 'Vietnam', lat: 14.0583, lng: 108.2772, risk: 7.8, color: '#ffaa44' }
+            ];
+            
+            countries.forEach(country => {
+                const marker = L.circleMarker([country.lat, country.lng], {
+                    radius: country.risk * 2,
+                    color: country.color,
+                    weight: 2,
+                    fillColor: country.color,
+                    fillOpacity: 0.5
+                }).addTo(vulnerableLayer);
+                
+                marker.bindPopup(`
+                    <b>${country.name}</b><br>
+                    Xavf darajasi: ${country.risk}/10
+                `);
+            });
+            
+            // Sea level rise areas
+            L.rectangle([[23.5, 89.0], [26.5, 92.0]], {
+                color: '#4444ff',
+                weight: 2,
+                fillColor: '#4444ff',
+                fillOpacity: 0.2
+            }).addTo(seaLevelLayer).bindPopup('Dengiz sathi ko\'tarilishi xavfi');
+        }
+
+        function showVulnerableCountries() {
+            map.addLayer(vulnerableLayer);
+            map.fitBounds(vulnerableLayer.getBounds());
+        }
+
+        function showSeaLevelRise() {
+            map.addLayer(seaLevelLayer);
+        }
+
+        function resetMap() {
+            map.removeLayer(vulnerableLayer);
+            map.removeLayer(seaLevelLayer);
+            map.setView([20, 0], 2);
+        }
+
+        // Charts initialization
+        function initCharts() {
+            // Emissions Chart
+            new Chart(document.getElementById('emissionsChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['AQSh (25%)', 'Yevropa (22%)', 'Xitoy (13%)', 'Hindiston (3%)', 'Boshqalar (37%)'],
+                    datasets: [{
+                        data: [25, 22, 13, 3, 37],
+                        backgroundColor: ['#ff4444', '#ff8844', '#ffaa44', '#44ff88', '#4444ff']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: 'white' } }
+                    }
+                }
+            });
+            
+            // Vulnerability Chart
+            new Chart(document.getElementById('vulnerabilityChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Maldives', 'Somali', 'Kiribati', 'Bangladesh', 'Haiti'],
+                    datasets: [{
+                        label: 'Xavf darajasi',
+                        data: [9.8, 9.2, 9.5, 8.9, 8.5],
+                        backgroundColor: ['#ff4444', '#ff8844', '#ffaa44', '#44ff88', '#4444ff']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, max: 10, grid: { color: 'rgba(255,255,255,0.1)' } },
+                        x: { grid: { display: false } }
+                    },
+                    plugins: {
+                        legend: { labels: { color: 'white' } }
+                    }
+                }
+            });
+            
+            // Economic Chart
+            new Chart(document.getElementById('economicChart'), {
+                type: 'line',
+                data: {
+                    labels: ['2025', '2030', '2035', '2040', '2045', '2050'],
+                    datasets: [
+                        { label: 'Maldives', data: [5, 15, 30, 50, 70, 85], borderColor: '#ff4444' },
+                        { label: 'Bangladesh', data: [2, 5, 10, 18, 28, 40], borderColor: '#44ff88' },
+                        { label: 'Somali', data: [3, 8, 15, 25, 35, 50], borderColor: '#ff8844' }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.1)' } }
+                    },
+                    plugins: {
+                        legend: { labels: { color: 'white' } }
+                    }
+                }
+            });
+            
+            // Injustice Chart
+            new Chart(document.getElementById('injusticeChart'), {
+                type: 'radar',
+                data: {
+                    labels: ['Emissiya', 'Iqtisodiyot', 'Moslashish', 'Texnologiya', 'Siyosat'],
+                    datasets: [
+                        { label: 'AQSh', data: [90, 85, 80, 95, 90], borderColor: '#ff4444', backgroundColor: 'rgba(255,68,68,0.2)' },
+                        { label: 'Bangladesh', data: [5, 30, 15, 20, 25], borderColor: '#4444ff', backgroundColor: 'rgba(68,68,255,0.2)' }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: { beginAtZero: true, max: 100, grid: { color: 'rgba(255,255,255,0.1)' } }
+                    },
+                    plugins: {
+                        legend: { labels: { color: 'white' } }
+                    }
+                }
+            });
+        }
+
+        // Counter animation
+        function animateCounters() {
+            const counters = document.querySelectorAll('.counter');
+            counters.forEach(counter => {
+                const target = parseInt(counter.getAttribute('data-target'));
+                let current = 0;
+                const increment = target / 50;
+                
+                const updateCounter = () => {
+                    if (current < target) {
+                        current += increment;
+                        counter.innerText = Math.round(current);
+                        setTimeout(updateCounter, 20);
+                    } else {
+                        counter.innerText = target;
+                    }
+                };
+                
+                updateCounter();
+            });
+        }
+
+        // Smooth scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        // Initialize everything
+        document.addEventListener('DOMContentLoaded', () => {
+            initMap();
+            initCharts();
+            animateCounters();
+        });
+    </script>
+</body>
+</html>
